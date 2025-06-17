@@ -1,0 +1,53 @@
+@startuml
+' ENUM FOR USER ROLE
+enum Role {
+  ADMIN
+  LIBRARIAN
+  MEMBER
+}
+
+' USER ENTITY
+class User {
+  - id: String
+  - name: String
+  - email: String
+  - password: String
+  - role: Role
+  + register()
+  + login()
+  + updateProfile()
+}
+
+' BOOK ENTITY
+class Book {
+  - id: String
+  - title: String
+  - author: String
+  - isbn: String
+  - category: String
+  - totalCopies: int
+  - availableCopies: int
+  + addBook()
+  + updateBook()
+  + deleteBook()
+  + search()
+}
+
+' BORROWING ENTITY
+class Borrowing {
+  - id: String
+  - userId: String
+  - bookId: String
+  - borrowDate: LocalDate
+  - returnDate: LocalDate
+  - dueDate: LocalDate
+  + borrowBook()
+  + returnBook()
+  + calculateLateFee()
+}
+
+' RELATIONSHIPS
+User "1" --> "*" Borrowing : borrows
+Book "1" --> "*" Borrowing : is borrowed in
+
+@enduml
