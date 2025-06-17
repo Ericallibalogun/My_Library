@@ -1,0 +1,6 @@
+package org.africa.semicolon.mylibrary.exceptions;
+
+public class UserAlreadyExistsException extends RuntimeException {
+    public UserAlreadyExistsException(String message) {super(message);}
+
+}
