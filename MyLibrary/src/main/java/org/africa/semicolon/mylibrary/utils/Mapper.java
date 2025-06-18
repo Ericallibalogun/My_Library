@@ -25,6 +25,7 @@ public class Mapper {
     }
     public static AddBookResponse mapRequestToBookResponse(Book savedBook){
         AddBookResponse response = new AddBookResponse();
+        response.setMessage("Added successfully");
         response.setTitle(savedBook.getTitle());
         response.setAuthor(savedBook.getAuthor());
         response.setCategory(savedBook.getCategory());
