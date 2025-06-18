@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.africa.semicolon.mylibrary.data.models.Book;
 import org.africa.semicolon.mylibrary.dtos.requests.AddBookRequest;
+import org.africa.semicolon.mylibrary.dtos.requests.BorrowBookRequest;
+import org.africa.semicolon.mylibrary.dtos.requests.ReturnBookRequest;
 import org.africa.semicolon.mylibrary.dtos.requests.UpdateBookRequest;
 import org.africa.semicolon.mylibrary.dtos.responses.AddBookResponse;
 import org.africa.semicolon.mylibrary.dtos.responses.ApiResponse;
@@ -46,6 +48,15 @@ public class BookController {
     ) {
         List<Book> results = bookService.searchBooks(title, author, category);
         return ResponseEntity.ok(results);
+    }
+    @PostMapping("/borrow")
+    public ResponseEntity<?> borrowBook(@RequestBody BorrowBookRequest request) {
+        return ResponseEntity.ok(new ApiResponse(true, bookService.borrowBook(request)));
+    }
+
+    @PostMapping("/return")
+    public ResponseEntity<?> returnBook(@RequestBody ReturnBookRequest request) {
+        return ResponseEntity.ok(new ApiResponse(true, bookService.returnBook(request)));
     }
 
 

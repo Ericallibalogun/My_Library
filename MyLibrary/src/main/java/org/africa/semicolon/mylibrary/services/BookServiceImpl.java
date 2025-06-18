@@ -1,18 +1,21 @@
 package org.africa.semicolon.mylibrary.services;
 
 import org.africa.semicolon.mylibrary.data.models.Book;
+import org.africa.semicolon.mylibrary.data.models.Borrowing;
 import org.africa.semicolon.mylibrary.data.repositories.BookRepo;
+import org.africa.semicolon.mylibrary.data.repositories.BorrowingRepo;
 import org.africa.semicolon.mylibrary.dtos.requests.AddBookRequest;
+import org.africa.semicolon.mylibrary.dtos.requests.BorrowBookRequest;
+import org.africa.semicolon.mylibrary.dtos.requests.ReturnBookRequest;
 import org.africa.semicolon.mylibrary.dtos.requests.UpdateBookRequest;
-import org.africa.semicolon.mylibrary.dtos.responses.AddBookResponse;
-import org.africa.semicolon.mylibrary.dtos.responses.DeleteBookResponse;
-import org.africa.semicolon.mylibrary.dtos.responses.UpdateBookResponse;
+import org.africa.semicolon.mylibrary.dtos.responses.*;
 import org.africa.semicolon.mylibrary.exceptions.BookNotFoundException;
 import org.africa.semicolon.mylibrary.exceptions.ExistedBookException;
 import org.africa.semicolon.mylibrary.utils.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.africa.semicolon.mylibrary.utils.Mapper.mapRequestToBookResponse;
@@ -21,6 +24,8 @@ import static org.africa.semicolon.mylibrary.utils.Mapper.mapRequestToBookRespon
 public class BookServiceImpl implements BookService {
     @Autowired
     private BookRepo bookRepo;
+    @Autowired
+    private BorrowingRepo borrowingRepo;
 
     @Override
     public AddBookResponse addBook(AddBookRequest request) {
@@ -29,7 +34,8 @@ public class BookServiceImpl implements BookService {
         }
         Book book = Mapper.mapRequestToBook(request);
         Book savedBook = bookRepo.save(book);
-        return mapRequestToBookResponse(savedBook);
+        AddBookResponse response = mapRequestToBookResponse(savedBook);
+        return response;
     }
 
     @Override
@@ -78,5 +84,54 @@ public class BookServiceImpl implements BookService {
         } else if (category != null) {
             return bookRepo.findByCategoryIgnoreCaseContaining(category);
         }else return bookRepo.findAll();
+    }
+
+    @Override
+    public BorrowBookResponse borrowBook(BorrowBookRequest request) {
+        Book book = bookRepo.findById(request.getBookId())
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        if (book.getAvailableCopies() <= 0) {
+            throw new RuntimeException("No copies available");
+        }
+
+        book.setAvailableCopies(book.getAvailableCopies() - 1);
+        bookRepo.save(book);
+
+        Borrowing record = new Borrowing();
+        record.setBookId(book.getId());
+        record.setUserId(request.getUserId());
+        record.setBorrowDate(LocalDate.now());
+        record.setReturned(false);
+
+        Borrowing savedRecord = borrowingRepo.save(record);
+
+        BorrowBookResponse response = new BorrowBookResponse();
+        response.setMessage("Book borrowed successfully");
+        response.setBorrowId(savedRecord.getId());
+        return response;
+    }
+    @Override
+    public ReturnBookResponse returnBook(ReturnBookRequest request) {
+        Borrowing record = borrowingRepo.findById(request.getBorrowId())
+                .orElseThrow(() -> new RuntimeException("Borrow record not found"));
+
+        if (record.isReturned()) {
+            throw new RuntimeException("Book already returned");
+        }
+
+        Book book = bookRepo.findById(record.getBookId())
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        book.setAvailableCopies(book.getAvailableCopies() + 1);
+        bookRepo.save(book);
+
+        record.setReturned(true);
+        record.setReturnDate(LocalDate.now());
+        borrowingRepo.save(record);
+
+        ReturnBookResponse response = new ReturnBookResponse();
+        response.setMessage("Book returned successfully");
+        return response;
     }
 }
