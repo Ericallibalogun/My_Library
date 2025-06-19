@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.africa.semicolon.mylibrary.data.models.Role;
 
 @Data
 @NoArgsConstructor
@@ -26,5 +27,5 @@ public class RegisterUserRequest {
 
     @Size(min = 6, max = 18,message = "password must be at least 6 characters")
     private String password;
-    private String role;
+    private Role role;
 }

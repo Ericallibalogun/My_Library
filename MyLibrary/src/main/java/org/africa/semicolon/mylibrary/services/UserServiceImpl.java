@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("This email or phone number has been registered");
         User user = Mapper.mapToUser(request);
 
-        Role userRole = Role.valueOf(request.getRole().toUpperCase());
+        Role userRole = request.getRole() != null ? request.getRole() : Role.USER;
         user.setRole(userRole);
 
         userRepo.save(user);
@@ -47,6 +47,9 @@ public class UserServiceImpl implements UserService {
         boolean isWrongPassword = !user.getPassword().equals(request.getPassword());
         if(isWrongPassword) throw new InvalidPasswordException("Wrong password");
 
+        if(user.getRole() == null){
+            throw new RuntimeException("User role is not assigned");
+        }
         response.setMessage("Login successful. welcome " + user.getFullName());
         response.setRole(user.getRole().name());
         return response;

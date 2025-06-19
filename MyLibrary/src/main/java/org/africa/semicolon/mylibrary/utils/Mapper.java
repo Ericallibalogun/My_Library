@@ -1,6 +1,7 @@
 package org.africa.semicolon.mylibrary.utils;
 
 import org.africa.semicolon.mylibrary.data.models.Book;
+import org.africa.semicolon.mylibrary.data.models.Role;
 import org.africa.semicolon.mylibrary.data.models.User;
 import org.africa.semicolon.mylibrary.dtos.requests.AddBookRequest;
 import org.africa.semicolon.mylibrary.dtos.requests.RegisterUserRequest;
@@ -13,6 +14,7 @@ public class Mapper {
         user.setEmail(request.getEmail());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setPassword(request.getPassword());
+        user.setRole(Role.USER);
         return user;
     }
     public static Book mapRequestToBook(AddBookRequest request){
